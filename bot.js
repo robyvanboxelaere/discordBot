@@ -3,7 +3,6 @@ require('dotenv').config()
 const Discord = require('discord.js');
 const client = new Discord.Client();
 let guildMessage;
-let botIsRunning = 1;
 
 //users that have opted into using the bot via the command
 let users = [];
@@ -24,16 +23,15 @@ client.on('message', message => {
                     message.reply("I'm already tracking you :O");
                 }
             });
-            if(checkUser){
+            if(!checkUser){
                 globalMessage = message;
-                // message.channel.send(`User: ${user}`);
-                // message.channel.send(`Username: ${user.username}`);
-                // message.channel.send(`ID: ${message.author.id}`);
-                lastUser = message.author;
+                let lastUser = message.author;
+
+                //see if user is running runelite
                 let ingameLocation = detectRunescape(lastUser.presence.activities)
+                //print error if user is not running runelite
                 if(ingameLocation === undefined){
                     message.channel.send(`${lastUser} Please use Runelite and have your game activity turned on :(`);
-                    users.splice(-1,1);
                     break;
                 }
                 users.push(message.author);
@@ -83,9 +81,11 @@ function detectRunescape(activities){
             runeliteActivity = entry;
         }
     });
+
     if(runeliteActivity === undefined){
         return undefined;
-    }        
+    }    
+
     let runescapeLocation = runeliteActivity.state;
     return runescapeLocation;
 }
@@ -106,12 +106,13 @@ function findCorrectChannel(location){
     if(correctChannel !== undefined){
         return correctChannel;
     }
+
     //didn't find the channel
     console.log(`Non existing channel: ${location}`);
 }
 
 async function replyMonkey(message, delay, double){
-    let daysOfMonkey = ["Sexy monkey sunday", "Macho monkey monday", "Thrilling monkey tuesday", "Wacky monkey wednesday", "Tacky monkey thursday", "Funny monkey friday", "Saggy monkey saturday"]
+    let daysOfMonkey = ["Sexy monkey sunday", "Macho monkey monday", "Thrilling monkey tuesday", "Wacky monkey wednesday", "Tacky monkey thursday", "Funny monkey friday", "Saggy monkey saturday"];
     let monkeyArray = [":monkey:",":monkey_face:",":see_no_evil:",":hear_no_evil:",":speak_no_evil:"];
     let plural = "monkey";
     let today = new Date();
