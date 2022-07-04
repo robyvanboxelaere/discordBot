@@ -25,26 +25,25 @@ client.on('message', message => {
                 }
             });
             if(checkUser){
-                users.push(message.author);
                 globalMessage = message;
-                message.channel.send(users);
                 // message.channel.send(`User: ${user}`);
                 // message.channel.send(`Username: ${user.username}`);
                 // message.channel.send(`ID: ${message.author.id}`);
-                lastUser = users[users.length - 1];
+                lastUser = message.author;
                 let ingameLocation = detectRunescape(lastUser.presence.activities)
-                if(ingameLocation !== undefined){
-                    message.channel.send(`Commencing movement for ${lastUser}`);
-        
-                    // moving user (get id from findCorrectChannel)
-                    let correctChannelID = findCorrectChannel(ingameLocation);
-                    let channel = message.guild.channels.cache.get(correctChannelID);
-                    let rMember = message.guild.member(lastUser);
-                    rMember.voice.setChannel(channel);
-                }else{
-                    message.channel.send("Please use Runelite and have your game activity turned on :(");
+                if(ingameLocation === undefined){
+                    message.channel.send(`${lastUser} Please use Runelite and have your game activity turned on :(`);
                     users.splice(-1,1);
+                    break;
                 }
+                users.push(message.author);
+                message.channel.send(`Commencing movement for ${lastUser}`);
+        
+                // moving user (get id from findCorrectChannel)
+                let correctChannelID = findCorrectChannel(ingameLocation);
+                let channel = message.guild.channels.cache.get(correctChannelID);
+                let rMember = message.guild.member(lastUser);
+                rMember.voice.setChannel(channel);
             }
             break;
         case "terminate cease":
@@ -84,28 +83,31 @@ function detectRunescape(activities){
             runeliteActivity = entry;
         }
     });
-    if(runeliteActivity !== undefined){
-        let runescapeLocation = runeliteActivity.state;
-        return runescapeLocation;
-    }else{
+    if(runeliteActivity === undefined){
         return undefined;
-    }
+    }        
+    let runescapeLocation = runeliteActivity.state;
+    return runescapeLocation;
 }
 
 function findCorrectChannel(location){
     let correctChannel;
     let channels = client.channels.cache.array();
+
+    //loop through channels
     channels.forEach(channel =>{
         if(location == channel.name){
             console.log(`Found the channel pog!!: ${channel.name}`);
             correctChannel = channel.id;
         }
     });
-    if(correctChannel === undefined){
-        console.log(`Non existing channel: ${location}`);
-    }else{
+
+    //found the channel
+    if(correctChannel !== undefined){
         return correctChannel;
     }
+    //didn't find the channel
+    console.log(`Non existing channel: ${location}`);
 }
 
 async function replyMonkey(message, delay, double){
