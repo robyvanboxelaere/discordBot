@@ -27,7 +27,7 @@ client.on('message', message => {
                 globalMessage = message;
                 let lastUser = message.author;
 
-                //see if user is running runelite
+                //see if user is using runelite
                 let ingameLocation = detectRunescape(lastUser.presence.activities)
                 //print error if user is not running runelite
                 if(ingameLocation === undefined){
